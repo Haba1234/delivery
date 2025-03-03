@@ -27,8 +27,10 @@ func CreateLocation(x int, y int) (Location, error) {
 	return Location{x, y}, nil
 }
 
-func CreateRandomLocation() Location {
-	return Location{rand.Intn(maxCoordinate) + 1, rand.Intn(maxCoordinate) + 1}
+func CreateRandomLocation() (Location, error) {
+	x := rand.Intn(maxCoordinate) + 1
+	y := rand.Intn(maxCoordinate) + 1
+	return CreateLocation(x, y)
 }
 
 func (l Location) X() int {
