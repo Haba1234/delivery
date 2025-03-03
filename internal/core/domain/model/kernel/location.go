@@ -9,13 +9,18 @@ var (
 	ErrLocationValueIsRequired = errors.New("coordinates outside the permitted range")
 )
 
+var (
+	minCoordinate = 1
+	maxCoordinate = 10
+)
+
 type Location struct {
 	x int
 	y int
 }
 
 func CreateLocation(x int, y int) (Location, error) {
-	if x < 1 || y < 1 || x > 10 || y > 10 {
+	if x < minCoordinate || y < minCoordinate || x > maxCoordinate || y > maxCoordinate {
 		return Location{}, ErrLocationValueIsRequired
 	}
 
@@ -23,7 +28,7 @@ func CreateLocation(x int, y int) (Location, error) {
 }
 
 func CreateRandomLocation() Location {
-	return Location{rand.Intn(10) + 1, rand.Intn(10) + 1}
+	return Location{rand.Intn(maxCoordinate) + 1, rand.Intn(maxCoordinate) + 1}
 }
 
 func (l Location) X() int {
