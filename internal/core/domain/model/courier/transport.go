@@ -1,10 +1,10 @@
 package courier
 
 import (
-	"math"
-
 	"github.com/Haba1234/delivery/internal/core/domain/model/kernel"
 	"github.com/Haba1234/delivery/internal/pkg/errs"
+
+	"github.com/google/uuid"
 )
 
 var (
@@ -12,14 +12,16 @@ var (
 	maxSpeed = 3
 )
 
+type TransportID = uuid.UUID
+
 type Transport struct {
-	id    int
+	id    TransportID
 	name  string
 	speed int
 }
 
-func NewTransport(id int, name string, speed int) (*Transport, error) {
-	if id < 1 || id > math.MaxInt {
+func NewTransport(id TransportID, name string, speed int) (*Transport, error) {
+	if id == uuid.Nil {
 		return nil, errs.NewValueIsRequiredError("id")
 	}
 	if name == "" {
@@ -37,7 +39,7 @@ func NewTransport(id int, name string, speed int) (*Transport, error) {
 	}, nil
 }
 
-func (t *Transport) ID() int {
+func (t *Transport) ID() TransportID {
 	return t.id
 }
 
@@ -59,11 +61,7 @@ func (t *Transport) Move(start, end kernel.Location) (kernel.Location, error) {
 	}
 
 	distance := start.DistanceTo(end)
-	stepLength := t.speed
-
-	if distance < t.speed {
-		stepLength = distance
-	}
+	stepLength := minValue(t.Speed(), distance)
 
 	deltaX := end.X() - start.X()
 	deltaY := end.Y() - start.Y()
