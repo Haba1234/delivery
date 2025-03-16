@@ -41,6 +41,10 @@ func (l Location) Y() int {
 	return l.y
 }
 
+func (l Location) IsEmpty() bool {
+	return l.x == 0 && l.y == 0
+}
+
 func (l Location) Equals(l2 Location) bool {
 	return l == l2
 }
