@@ -4,7 +4,7 @@ const (
 	StatusEmpty     Status = ""
 	StatusCreated   Status = "created"
 	StatusAssigned  Status = "assigned"
-	StatusCompleted Status = "completed "
+	StatusCompleted Status = "completed"
 )
 
 type Status string

@@ -4,27 +4,23 @@ import (
 	"testing"
 
 	"github.com/Haba1234/delivery/internal/core/domain/model/kernel"
-
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestCourier(t *testing.T) {
-	transport, err := NewTransport(uuid.New(), "Bike", 3)
-	require.NoError(t, err)
-
 	location, err := kernel.CreateLocation(5, 5)
 	require.NoError(t, err)
 
 	t.Run(
 		"Success", func(t *testing.T) {
-			newCourier, err := New("Jon", transport, location)
+			newCourier, err := New("Jon", "Bike", 2, location)
 			require.NoError(t, err)
 
-			assert.Equal(t, "Jon", newCourier.ID())
-			assert.Equal(t, "Test", newCourier.Name())
-			assert.Equal(t, transport, newCourier.Transport())
+			assert.Equal(t, "Jon", newCourier.Name())
+			assert.NotNil(t, newCourier.Transport())
+			assert.Equal(t, 2, newCourier.Transport().Speed())
+			assert.Equal(t, "Bike", newCourier.Transport().Name())
 			assert.Equal(t, location, newCourier.Location())
 			assert.Equal(t, StatusFree, newCourier.Status())
 		},
@@ -32,7 +28,7 @@ func TestCourier(t *testing.T) {
 
 	t.Run(
 		"Invalid Name", func(t *testing.T) {
-			newCourier, err := New("", transport, location)
+			newCourier, err := New("", "Bike", 2, location)
 			assert.Error(t, err)
 			require.Nil(t, newCourier)
 		},
@@ -40,38 +36,41 @@ func TestCourier(t *testing.T) {
 
 	t.Run(
 		"status busy", func(t *testing.T) {
-			newCourier, err := New("Jon", transport, location)
+			newCourier, err := New("Jon", "Bike", 2, location)
 			require.NoError(t, err)
 			assert.Equal(t, StatusFree, newCourier.Status())
 
-			newCourier.SetBusy()
+			err = newCourier.SetBusy()
+			require.NoError(t, err)
 			assert.Equal(t, StatusBusy, newCourier.Status())
+
+			err = newCourier.SetBusy()
+			assert.ErrorIs(t, err, ErrCourierIsBusy)
 		},
 	)
 
 	t.Run(
 		"status free", func(t *testing.T) {
-			newCourier, err := New("Jon", transport, location)
+			newCourier, err := New("Jon", "Bike", 2, location)
 			require.NoError(t, err)
 			assert.Equal(t, StatusFree, newCourier.Status())
 
-			newCourier.SetBusy()
+			err = newCourier.SetBusy()
+			require.NoError(t, err)
 			assert.Equal(t, StatusBusy, newCourier.Status())
 
-			newCourier.SetFree()
+			err = newCourier.SetFree()
+			require.NoError(t, err)
 			assert.Equal(t, StatusFree, newCourier.Status())
 		},
 	)
 }
 
 func TestCourier_CalculateTimeToLocation(t *testing.T) {
-	transport, err := NewTransport(uuid.New(), "Bike", 2)
-	require.NoError(t, err)
-
 	courierLocation, err := kernel.CreateLocation(1, 1)
 	require.NoError(t, err)
 
-	courier, err := New("Jon", transport, courierLocation)
+	courier, err := New("Jon", "Bike", 2, courierLocation)
 	require.NoError(t, err)
 
 	tests := []struct {
@@ -82,7 +81,7 @@ func TestCourier_CalculateTimeToLocation(t *testing.T) {
 		{
 			name:           "Same location",
 			targetLocation: courierLocation,
-			expectedTime:   0,
+			expectedTime:   0.0,
 		},
 		{
 			name: "Directly adjacent location",
@@ -116,8 +115,9 @@ func TestCourier_CalculateTimeToLocation(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(
 			tt.name, func(t *testing.T) {
-				actualTime := courier.CalculateTimeToLocation(tt.targetLocation)
-				assert.InEpsilon(t, tt.expectedTime, actualTime, 0.01)
+				actualTime, err := courier.CalculateTimeToLocation(tt.targetLocation)
+				require.NoError(t, err)
+				assert.Equal(t, tt.expectedTime, actualTime)
 			},
 		)
 	}

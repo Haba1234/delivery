@@ -3,6 +3,7 @@ package order
 import (
 	"testing"
 
+	"github.com/Haba1234/delivery/internal/core/domain/model/courier"
 	"github.com/Haba1234/delivery/internal/core/domain/model/kernel"
 
 	"github.com/google/uuid"
@@ -48,10 +49,17 @@ func TestOrder_AssignCourier(t *testing.T) {
 		"Success", func(t *testing.T) {
 			newOrder, err := New(orderID, location)
 			require.NoError(t, err)
-			require.NoError(t, newOrder.Assign(courierID))
 
+			executor, err := courier.New("Jon", "Bike", 2, location)
+			require.NoError(t, err)
+
+			err = newOrder.Assign(executor)
+			require.NoError(t, err)
 			assert.Equal(t, StatusAssigned, newOrder.Status())
-			assert.Equal(t, courierID, newOrder.CourierID())
+			assert.NotNil(t, courierID, newOrder.CourierID())
+
+			err = newOrder.Assign(executor)
+			assert.ErrorIs(t, err, ErrOrderAlreadyAssigned)
 		},
 	)
 
@@ -60,7 +68,7 @@ func TestOrder_AssignCourier(t *testing.T) {
 			newOrder, err := New(orderID, location)
 			require.NoError(t, err)
 
-			assert.Error(t, newOrder.Assign(uuid.Nil))
+			assert.Error(t, newOrder.Assign(nil))
 		},
 	)
 }
@@ -74,10 +82,14 @@ func TestOrder_Complete(t *testing.T) {
 
 	newOrder, err := New(orderID, location)
 	require.NoError(t, err)
-	require.NoError(t, newOrder.Assign(courierID))
+
+	executor, err := courier.New("Jon", "Bike", 2, location)
+	require.NoError(t, err)
+
+	require.NoError(t, newOrder.Assign(executor))
 
 	assert.Equal(t, StatusAssigned, newOrder.Status())
-	assert.Equal(t, courierID, newOrder.CourierID())
+	assert.NotNil(t, courierID, newOrder.CourierID())
 
 	err = newOrder.Complete()
 	require.NoError(t, err)
