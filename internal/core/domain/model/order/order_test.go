@@ -25,7 +25,7 @@ func TestOrder(t *testing.T) {
 			assert.Equal(t, orderID, newOrder.ID())
 			assert.Equal(t, location, newOrder.Location())
 			assert.Equal(t, StatusCreated, newOrder.Status())
-			assert.Equal(t, uuid.Nil, newOrder.CourierID())
+			assert.Nil(t, newOrder.CourierID())
 		},
 	)
 
