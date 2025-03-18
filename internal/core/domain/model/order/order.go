@@ -22,7 +22,7 @@ type (
 		id        ID
 		location  kernel.Location
 		status    Status
-		courierID courier.ID
+		courierID *courier.ID
 	}
 )
 
@@ -36,10 +36,9 @@ func New(orderID ID, location kernel.Location) (*Order, error) {
 	}
 
 	return &Order{
-		id:        orderID,
-		location:  location,
-		status:    StatusCreated,
-		courierID: uuid.Nil,
+		id:       orderID,
+		location: location,
+		status:   StatusCreated,
 	}, nil
 }
 
@@ -55,7 +54,7 @@ func (o *Order) Status() Status {
 	return o.status
 }
 
-func (o *Order) CourierID() courier.ID {
+func (o *Order) CourierID() *courier.ID {
 	return o.courierID
 }
 
@@ -76,7 +75,8 @@ func (o *Order) Assign(executor *courier.Courier) error {
 		return ErrOrderAlreadyAssigned
 	}
 
-	o.courierID = executor.ID()
+	id := executor.ID()
+	o.courierID = &id
 	o.status = StatusAssigned
 
 	return nil
