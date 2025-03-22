@@ -100,3 +100,7 @@ func (o *Order) Complete() error {
 
 	return nil
 }
+
+func (o *Order) IsCompleted() bool {
+	return o.status == StatusCompleted
+}

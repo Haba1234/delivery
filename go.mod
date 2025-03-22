@@ -10,6 +10,7 @@ require (
 	github.com/labstack/gommon v0.4.2
 	github.com/stretchr/testify v1.10.0
 	github.com/testcontainers/testcontainers-go v0.35.0
+	go.uber.org/mock v0.5.0
 	gorm.io/driver/postgres v1.5.11
 	gorm.io/gorm v1.25.12
 )

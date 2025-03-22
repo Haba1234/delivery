@@ -58,7 +58,7 @@ func TestTransport_Move(t *testing.T) {
 			end, err := kernel.CreateLocation(2, 2)
 			require.NoError(t, err)
 
-			newLocation, err := transport.Move(start, end)
+			newLocation, err := transport.move(start, end)
 			require.NoError(t, err)
 
 			assert.Equal(t, 2, newLocation.X())
@@ -77,7 +77,7 @@ func TestTransport_Move(t *testing.T) {
 			end, err := kernel.CreateLocation(1, 1)
 			require.NoError(t, err)
 
-			newLocation, err := transport.Move(start, end)
+			newLocation, err := transport.move(start, end)
 			require.NoError(t, err)
 
 			assert.Equal(t, 1, newLocation.X())
@@ -96,7 +96,7 @@ func TestTransport_Move(t *testing.T) {
 			end, err := kernel.CreateLocation(1, 1)
 			require.NoError(t, err)
 
-			newLocation, err := transport.Move(start, end)
+			newLocation, err := transport.move(start, end)
 			require.NoError(t, err)
 
 			assert.Equal(t, 2, newLocation.X())
