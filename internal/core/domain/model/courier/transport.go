@@ -39,6 +39,14 @@ func NewTransport(id TransportID, name string, speed int) (*Transport, error) {
 	}, nil
 }
 
+func RestoreTransport(id TransportID, name string, speed int) *Transport {
+	return &Transport{
+		id:    id,
+		name:  name,
+		speed: speed,
+	}
+}
+
 func (t *Transport) ID() TransportID {
 	return t.id
 }

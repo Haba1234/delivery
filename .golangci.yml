@@ -265,7 +265,6 @@ linters:
     - reassign
     - tagliatelle
     - testableexamples
-    - tenv
     - thelper
     - forbidigo
     - bodyclose

@@ -52,6 +52,16 @@ func New(name, transportName string, transportSpeed int, location kernel.Locatio
 	}, nil
 }
 
+func Restore(id ID, name string, transport *Transport, location kernel.Location, status Status) *Courier {
+	return &Courier{
+		id:        id,
+		name:      name,
+		transport: transport,
+		location:  location,
+		status:    status,
+	}
+}
+
 func (c *Courier) ID() ID {
 	return c.id
 }
