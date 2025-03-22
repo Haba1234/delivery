@@ -20,9 +20,9 @@ type (
 	ID    = uuid.UUID
 	Order struct {
 		id        ID
+		courierID *courier.ID
 		location  kernel.Location
 		status    Status
-		courierID *courier.ID
 	}
 )
 
@@ -40,6 +40,15 @@ func New(orderID ID, location kernel.Location) (*Order, error) {
 		location: location,
 		status:   StatusCreated,
 	}, nil
+}
+
+func Restore(orderID ID, courierID *courier.ID, location kernel.Location, status Status) *Order {
+	return &Order{
+		id:        orderID,
+		location:  location,
+		status:    status,
+		courierID: courierID,
+	}
 }
 
 func (o *Order) ID() ID {
