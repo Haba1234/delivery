@@ -16,6 +16,12 @@ import (
 
 var _ ports.IOrderRepository = &Repository{}
 
+var (
+	ErrOrderNotFound          = errors.New("order not found")
+	ErrOrderCreatedNotFound   = errors.New("order with the status was Created not found")
+	ErrAssignedOrdersNotFound = errors.New("assigned orders not found")
+)
+
 type Repository struct {
 	db *gorm.DB
 }
@@ -44,6 +50,7 @@ func (r *Repository) Add(ctx context.Context, aggregate *order.Order) error {
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -61,6 +68,7 @@ func (r *Repository) Update(ctx context.Context, aggregate *order.Order) error {
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -76,7 +84,7 @@ func (r *Repository) Get(ctx context.Context, id uuid.UUID) (*order.Order, error
 		Preload(clause.Associations).
 		Find(&modelOrder, id)
 	if result.RowsAffected == 0 {
-		return nil, postgres.ErrNotFound
+		return nil, ErrOrderNotFound
 	}
 
 	aggregate := toDomain(modelOrder)
@@ -97,7 +105,7 @@ func (r *Repository) GetFirstInCreatedStatus(ctx context.Context) (*order.Order,
 		First(&modelOrder)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return nil, postgres.ErrNotFound
+			return nil, ErrOrderCreatedNotFound
 		}
 		return nil, result.Error
 	}
@@ -122,7 +130,7 @@ func (r *Repository) GetAllInAssignedStatus(ctx context.Context) ([]*order.Order
 		return nil, result.Error
 	}
 	if result.RowsAffected == 0 {
-		return nil, postgres.ErrNotFound
+		return nil, ErrAssignedOrdersNotFound
 	}
 
 	aggregates := make([]*order.Order, len(modelOrders))

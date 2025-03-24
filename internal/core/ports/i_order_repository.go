@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 )
 
+//go:generate mockgen -destination=./../../mocks/order_repository_mock.go -package=mocks . IOrderRepository
 type IOrderRepository interface {
 	Add(ctx context.Context, aggregate *order.Order) error
 	Update(ctx context.Context, aggregate *order.Order) error

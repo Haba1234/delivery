@@ -2,6 +2,7 @@ package courier
 
 import (
 	"context"
+	"errors"
 
 	"github.com/Haba1234/delivery/internal/adapters/out/postgres"
 	"github.com/Haba1234/delivery/internal/core/domain/model/courier"
@@ -14,6 +15,11 @@ import (
 )
 
 var _ ports.ICourierRepository = &Repository{}
+
+var (
+	ErrCourierNotFound = errors.New("courier not found")
+	ErrNoFreeCouriers  = errors.New("no free couriers")
+)
 
 type Repository struct {
 	db *gorm.DB
@@ -77,7 +83,7 @@ func (r *Repository) Get(ctx context.Context, id uuid.UUID) (*courier.Courier, e
 		Preload(clause.Associations).
 		Find(&modelCourier, id)
 	if result.RowsAffected == 0 {
-		return nil, postgres.ErrNotFound
+		return nil, ErrCourierNotFound
 	}
 
 	return toDomain(modelCourier), nil
@@ -100,7 +106,7 @@ func (r *Repository) GetAllInFreeStatus(ctx context.Context) ([]*courier.Courier
 	}
 
 	if result.RowsAffected == 0 {
-		return nil, postgres.ErrNotFound
+		return nil, ErrNoFreeCouriers
 	}
 
 	aggregates := make([]*courier.Courier, len(modelCouriers))

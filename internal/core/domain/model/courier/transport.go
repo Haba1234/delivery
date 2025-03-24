@@ -63,7 +63,7 @@ func (t *Transport) Equals(other *Transport) bool {
 	return t.id == other.id
 }
 
-func (t *Transport) Move(start, end kernel.Location) (kernel.Location, error) {
+func (t *Transport) move(start, end kernel.Location) (kernel.Location, error) {
 	if start.Equals(end) {
 		return end, nil
 	}

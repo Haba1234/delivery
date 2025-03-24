@@ -110,3 +110,18 @@ func (c *Courier) CalculateTimeToLocation(location kernel.Location) (float64, er
 
 	return float64(distance) / float64(c.transport.Speed()), nil
 }
+
+func (c *Courier) Move(target kernel.Location) error {
+	if target.IsEmpty() {
+		return errs.NewValueIsRequiredError("target")
+	}
+
+	location, err := c.transport.move(c.location, target)
+	if err != nil {
+		return err
+	}
+
+	c.location = location
+
+	return nil
+}
