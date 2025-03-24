@@ -6,4 +6,7 @@ build: ## Build application
 	go build -o build/${APP_NAME} cmd/app/main.go
 
 lint:
-	golangci-lint run ./... -v --fix
+	golangci-lint run ./... -v
+
+test:
+	go test ./internal/...

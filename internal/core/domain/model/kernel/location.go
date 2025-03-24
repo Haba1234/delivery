@@ -19,12 +19,16 @@ type Location struct {
 	y int
 }
 
-func CreateLocation(x int, y int) (Location, error) {
+func CreateLocation(x, y int) (Location, error) {
 	if x < minCoordinate || y < minCoordinate || x > maxCoordinate || y > maxCoordinate {
 		return Location{}, ErrLocationValueIsRequired
 	}
 
 	return Location{x, y}, nil
+}
+
+func RestoreLocation(x, y int) Location {
+	return Location{x, y}
 }
 
 func CreateRandomLocation() (Location, error) {
