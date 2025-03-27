@@ -2,7 +2,6 @@ package queries
 
 import (
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 )
 
 type GetNotCompletedOrdersResponse struct {
@@ -10,11 +9,7 @@ type GetNotCompletedOrdersResponse struct {
 }
 
 type OrderResponse struct {
-	gorm.Model
-	ID       uuid.UUID
-	Location ModelLocation `gorm:"embedded;embeddedPrefix:location_"`
-}
-
-func (OrderResponse) TableName() string {
-	return "orders"
+	ID        uuid.UUID `gorm:"column:id"`
+	LocationX int       `gorm:"column:location_x"`
+	LocationY int       `gorm:"column:location_y"`
 }

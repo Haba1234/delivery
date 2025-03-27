@@ -5,7 +5,6 @@ import (
 	"github.com/Haba1234/delivery/internal/pkg/errs"
 
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
 
 type IGetNotCompletedOrdersHandler interface {
@@ -31,9 +30,8 @@ func (q *GetNotCompletedOrdersHandler) Handle(query GetNotCompletedOrders) (GetN
 	var orders []OrderResponse
 
 	result := q.db.
-		Preload(clause.Associations).
-		Where("status != ?", order.StatusCompleted).
-		Find(&orders)
+		Raw("SELECT id, location_x, location_y FROM orders WHERE status != ?", order.StatusCompleted).
+		Scan(&orders)
 
 	if result.Error != nil {
 		return GetNotCompletedOrdersResponse{}, result.Error

@@ -4,7 +4,6 @@ import (
 	"github.com/Haba1234/delivery/internal/pkg/errs"
 
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
 
 type IGetAllCouriersHandler interface {
@@ -30,8 +29,8 @@ func (q *GetAllCouriersHandler) Handle(query GetAllCouriers) (GetAllCouriersResp
 	var couriers []CourierResponse
 
 	result := q.db.
-		Preload(clause.Associations).
-		Find(&couriers)
+		Raw("SELECT id, name, location_x, location_y FROM couriers").
+		Scan(&couriers)
 
 	if result.Error != nil {
 		return GetAllCouriersResponse{}, result.Error

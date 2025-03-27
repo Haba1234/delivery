@@ -26,17 +26,17 @@ func (s *Server) GetOrders(c echo.Context) error {
 	}
 
 	var orders []servers.Order
-	for _, courier := range response.Orders {
+	for _, o := range response.Orders {
 		location := servers.Location{
-			X: courier.Location.X,
-			Y: courier.Location.Y,
+			X: o.LocationX,
+			Y: o.LocationY,
 		}
 
-		var courier = servers.Order{
-			Id:       courier.ID,
+		var order = servers.Order{
+			Id:       o.ID,
 			Location: location,
 		}
-		orders = append(orders, courier)
+		orders = append(orders, order)
 	}
 
 	return c.JSON(http.StatusOK, orders)

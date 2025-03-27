@@ -28,8 +28,8 @@ func (s *Server) GetCouriers(c echo.Context) error {
 	var couriers []servers.Courier
 	for _, courier := range response.Couriers {
 		location := servers.Location{
-			X: courier.Location.X,
-			Y: courier.Location.Y,
+			X: courier.LocationX,
+			Y: courier.LocationY,
 		}
 
 		var courier = servers.Courier{

@@ -2,7 +2,6 @@ package queries
 
 import (
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 )
 
 type GetAllCouriersResponse struct {
@@ -10,12 +9,8 @@ type GetAllCouriersResponse struct {
 }
 
 type CourierResponse struct {
-	gorm.Model
-	ID       uuid.UUID
-	Name     string
-	Location ModelLocation `gorm:"embedded;embeddedPrefix:location_"`
-}
-
-func (CourierResponse) TableName() string {
-	return "couriers"
+	ID        uuid.UUID `gorm:"column:id"`
+	Name      string    `gorm:"column:name"`
+	LocationX int       `gorm:"column:location_x"`
+	LocationY int       `gorm:"column:location_y"`
 }
