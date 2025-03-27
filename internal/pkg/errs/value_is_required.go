@@ -1,15 +1,37 @@
 package errs
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
+
+var ErrValueIsRequired = errors.New("value is required")
 
 type ValueIsRequiredError struct {
-	msg string
+	ParamName string
+	Cause     error
 }
 
-func NewValueIsRequiredError(msg string) ValueIsRequiredError {
-	return ValueIsRequiredError{msg: msg}
+func NewValueIsRequiredErrorWithCause(paramName string, cause error) *ValueIsRequiredError {
+	return &ValueIsRequiredError{
+		ParamName: paramName,
+		Cause:     cause,
+	}
 }
 
-func (v ValueIsRequiredError) Error() string {
-	return fmt.Sprintf("value is required %s", v.msg)
+func NewValueIsRequiredError(paramName string) *ValueIsRequiredError {
+	return &ValueIsRequiredError{
+		ParamName: paramName,
+	}
+}
+
+func (e *ValueIsRequiredError) Error() string {
+	if e.Cause != nil {
+		return fmt.Sprintf("%s: %s (cause: %v)", ErrValueIsRequired, e.ParamName, e.Cause)
+	}
+	return fmt.Sprintf("%s: %s", ErrValueIsRequired, e.ParamName)
+}
+
+func (*ValueIsRequiredError) Unwrap() error {
+	return ErrValueIsRequired
 }

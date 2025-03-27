@@ -1,26 +1,60 @@
 package errs
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+	"strings"
+)
 
-func NewValueIsOutOfRangeError(paramName string, value any, min any, max any) ValueIsOutOfRange {
-	return ValueIsOutOfRange{
-		paramName: paramName,
-		value:     value,
-		min:       min,
-		max:       max,
+var ErrValueIsOutOfRange = errors.New("value is out of range")
+
+type ValueIsOutOfRangeError struct {
+	ParamName string
+	Value     any
+	Min       any
+	Max       any
+	Cause     error
+}
+
+func NewValueIsOutOfRangeErrorWithCause(
+	paramName string, value any, min any, max any, cause error,
+) *ValueIsOutOfRangeError {
+	return &ValueIsOutOfRangeError{
+		ParamName: paramName,
+		Value:     value,
+		Min:       min,
+		Max:       max,
+		Cause:     cause,
 	}
 }
 
-type ValueIsOutOfRange struct {
-	paramName string
-	value     any
-	min       any
-	max       any
+func NewValueIsOutOfRangeError(paramName string, value any, min any, max any) *ValueIsOutOfRangeError {
+	return &ValueIsOutOfRangeError{
+		ParamName: paramName,
+		Value:     value,
+		Min:       min,
+		Max:       max,
+	}
 }
 
-func (v ValueIsOutOfRange) Error() string {
+func (e *ValueIsOutOfRangeError) Error() string {
+	if e.Cause != nil {
+		return fmt.Sprintf(
+			"%s: %s is %v, min value is %v, max value is %v (cause: %v)",
+			ErrValueIsInvalid, sanitize(e.Value), e.ParamName, e.Min, e.Max, e.Cause,
+		)
+	}
 	return fmt.Sprintf(
-		"value %v of %v is out of range , min value is %v, max value is %v",
-		v.value, v.paramName, v.min, v.max,
+		"%s: %s is %v, min value is %v, max value is %v",
+		ErrValueIsInvalid, sanitize(e.Value), e.ParamName, e.Min, e.Max,
 	)
+}
+
+func (*ValueIsOutOfRangeError) Unwrap() error {
+	return ErrValueIsOutOfRange
+}
+
+func sanitize(input any) string {
+	str := fmt.Sprintf("%v", input)
+	return strings.ReplaceAll(str, "\n", " ")
 }

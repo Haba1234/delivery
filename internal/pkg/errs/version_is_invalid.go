@@ -1,15 +1,37 @@
 package errs
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
+
+var ErrVersionIsInvalid = errors.New("version is invalid")
 
 type VersionIsInvalidError struct {
-	msg string
+	ParamName string
+	Cause     error
 }
 
-func NewVersionIsInvalidError(msg string) VersionIsInvalidError {
-	return VersionIsInvalidError{msg: msg}
+func NewVersionIsInvalidError(paramName string, cause error) *VersionIsInvalidError {
+	return &VersionIsInvalidError{
+		ParamName: paramName,
+		Cause:     cause,
+	}
 }
 
-func (v VersionIsInvalidError) Error() string {
-	return fmt.Sprintf("version is invalid %s", v.msg)
+func NewVersionIsInvalidErrorWithCause(paramName string) *VersionIsInvalidError {
+	return &VersionIsInvalidError{
+		ParamName: paramName,
+	}
+}
+
+func (e *VersionIsInvalidError) Error() string {
+	if e.Cause != nil {
+		return fmt.Sprintf("%s: %s (cause: %v)", ErrVersionIsInvalid, e.ParamName, e.Cause)
+	}
+	return fmt.Sprintf("%s: %s", ErrVersionIsInvalid, e.ParamName)
+}
+
+func (*VersionIsInvalidError) Unwrap() error {
+	return ErrVersionIsInvalid
 }

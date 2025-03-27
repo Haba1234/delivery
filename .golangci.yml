@@ -1,327 +1,267 @@
-# All available settings of specific linters.
-linters-settings:
-  gci:
-    # Section configuration to compare against.
-    # Section names are case-insensitive and may contain parameters in ().
-    # The default order of sections is `standard > default > custom > blank > dot > alias > localmodule`,
-    # If `custom-order` is `true`, it follows the order of `sections` option.
-    # Default: ["standard", "default"]
-    sections:
-      - standard # Standard section: captures all standard packages.
-      - localmodule # Local module section: contains all local packages. This section is not present unless explicitly enabled.
-      - default # Default section: contains all imports that could not be matched to another section type.
-      # - blank # Blank section: contains all blank imports. This section is not present unless explicitly enabled.
-      # - dot # Dot section: contains all dot imports. This section is not present unless explicitly enabled.
-      # - alias # Alias section: contains all alias imports. This section is not present unless explicitly enabled.
+# Version 0.0.17 (26.03.2025)
 
-    # Enable custom order of sections.
-    # If `true`, make the section order the same as the order of `sections`.
-    custom-order: true
-  depguard:
-    rules:
-      # Name of a rule.
-      main:
-        deny:
-          - pkg: "github.com/golang/protobuf"
-            desc: packet deprecated.
-      test:
-        files:
-          - $test
-        deny:
-          - pkg: "reflect"
-            desc: Please don't use reflect package in tests
-  dogsled:
-    # Checks assignments with too many blank identifiers.
-    # Default: 2
-    max-blank-identifiers: 2
-  dupl:
-    # Tokens count to trigger issue.
-    threshold: 150
-  errcheck:
-    # Report about not checking of errors in type assertions: `a := b.(MyStruct)`.
-    check-type-assertions: true
-    # report about assignment of errors to blank identifier: `num, _ := strconv.Atoi(numStr)`.
-    check-blank: true
-    exclude-functions:
-      - io/ioutil.ReadFile
-      - io.Copy(*bytes.Buffer)
-      - io.Copy(os.Stdout)
-  funlen:
-    lines: 60 # the number of lines (code + empty lines) is not a right metric and leads to code without empty line or one-liner.
-    statements: 40  # Checks the number of statements in a function.
-    ignore-comments: true # Ignore comments when counting lines.
-  goconst:
-    min-len: 2 # Minimal length of string constant.
-    min-occurrences: 3 # Minimum occurrences of constant string count to trigger issue.
-    ignore-tests: true # Ignore test files.
-    numbers: true # Search also for duplicated numbers.
-  gocritic:
-    enabled-tags:
-      - diagnostic
-      - experimental
-      - opinionated
-      - performance
-      - style
-    disabled-checks:
-      - dupImport # https://github.com/go-critic/go-critic/issues/845
-      - ifElseChain
-      - octalLiteral
-    settings:
-      commentedOutCode:
-        minLength: 50 # Min length of the comment that triggers a warning.
-      elseif:
-        skipBalanced: false # Whether to skip balanced if-else pairs.
-      nestingReduce:
-        bodyWidth: 5 # Min number of statements inside a branch to trigger a warning.
-      hugeParam:
-        sizeThreshold: 512 # Size in bytes that makes the warning trigger.
-      rangeValCopy:
-        sizeThreshold: 512 # Size in bytes that makes the warning trigger.
-  godox:
-    keywords:
-      - FIXME
-  gofmt:
-    rewrite-rules:
-      - pattern: 'interface{}'
-        replacement: 'any'
-      - pattern: 'a[b:len(a)]'
-        replacement: 'a[b:]'
-  mnd:
-    # List of enabled checks, see https://github.com/tommy-muehle/go-mnd/#checks for description.
-    # Default: ["argument", "case", "condition", "operation", "return", "assign"]
-    checks:
-      - argument
-      - case
-      - condition
-      - operation
-      - return
-      - assign
-    # List of numbers to exclude from analysis.
-    # The numbers should be written as string.
-    # Values always ignored: "1", "1.0", "0" and "0.0"
-    # Default: []
-    ignored-numbers:
-      - '0666'
-    # List of function patterns to exclude from analysis.
-    # Following functions are always ignored: `time.Date`,
-    # `strconv.FormatInt`, `strconv.FormatUint`, `strconv.FormatFloat`,
-    # `strconv.ParseInt`, `strconv.ParseUint`, `strconv.ParseFloat`.
-    ignored-functions:
-      - strings.SplitN
-  govet:
-    enable-all: true
-    #    enable:
-    #      - nilness
-    #      - shadow
-    disable:
-      - structtag
-      - fieldalignment
-  errorlint:
-    asserts: false
-    errorf: false
-  gosec:
-    excludes:
-      - G108 # Profiling endpoint automatically exposed on /debug/pprof
-      - G112 #Potential Slowloris Attack because ReadHeaderTimeout is not configured in the http.Server
-  misspell:
-    locale: US
-    ignore-words:
-      - "importas" # linter name
-  nolintlint:
-    allow-unused: false # report any unused nolint directives
-    require-explanation: true # require an explanation for nolint directives
-    require-specific: true # require nolint directives to be specific about which linter is being skipped
-  revive:
-    ignore-generated-header: true # When set to false, ignores files with "GENERATED" header, similar to golint.
-    enable-all-rules: true # Enable all available rules.
-    # Sets the default failure confidence.
-    # This means that linting errors with less than 0.8 confidence will be ignored.
-    # Default: 0.8
-    confidence: 0.8
-    rules:
-      - name: unexported-return
-        disabled: true
-      - name: line-length-limit
-        arguments: [120]
-      - name: add-constant # Аналог goconst, пока выключил
-        arguments: [{ maxLitCount = "2", ignoreFuncs = "os\\.*,fmt\\.Println,make" }]
-        disabled: true
-      - name: max-public-structs
-        disabled: true
-      - name: function-length # Аналог funlen, надо выбрать
-        arguments: [30,50] # number of operators, number of lines in a function
-        disabled: true
-      - name: cognitive-complexity
-        arguments: [ 20 ]
-      - name: cyclomatic
-        arguments: [ 15 ]
-      - name: flag-parameter
-        disabled: true
-      - name: filename-format
-        arguments:
-          - "^[_a-z][_a-z0-9]*.go$"
-  nakedret:
-    # Make an issue if func has more lines of code than this setting, and it has naked returns.
-    max-func-lines: 30
-  nlreturn:
-    # Size of the block (including return statement that is still "OK")
-    # so no return split required.
-    block-size: 2
-  protogetter:
-    # Skip files generated by specified generators from the checking.
-    # Checks only the file's initial comment, which must follow the format: "// Code generated by <generator-name>".
-    # Files generated by protoc-gen-go, protoc-gen-go-grpc, and protoc-gen-grpc-gateway are always excluded automatically.
-    #skip-generated-by: [ "protoc-gen-go-my-own-generator" ]
-    skip-files: # Skip files matching the specified glob pattern from the checking.
-      - "*.pb.go"
-    skip-any-generated: true # Skip any generated files from the checking.
-    replace-first-arg-in-append: true # Skip first argument of append function.
-  staticcheck:
-    # SAxxxx checks in https://staticcheck.io/docs/configuration/options/#checks
-    # Default: ["*"]
-    checks: [ "all" ]
-  godot:
-    # Comments to be checked: `declarations`, `toplevel`, or `all`.
-    scope: toplevel
-    # List of regexps for excluding particular comment lines from check.
-    exclude:
-      # Exclude todo and fixme comments.
-      - "^fixme:"
-      - "^todo:"
-      - "^TODO:"
-    # Check that each sentence ends with a period.
-    period: true
-    # Check that each sentence starts with a capital letter.
-    capital: true
-  tagliatelle:
-    case:
-      rules:
-        json: snake # why it's not a `snake` by default?!
-        yaml: snake # why it's not a `snake` by default?!
-        xml: camel
-        bson: camel
-        avro: snake
-        mapstructure: kebab
-  iface:
-    # List of analyzers.
-    # Default: ["identical"]
-    enable:
-      - identical # Identifies interfaces in the same package that have identical method sets.
-      - unused # Identifies interfaces that are not used anywhere in the same package where the interface is defined.
-      - opaque # Identifies functions that return interfaces, but the actual returned value is always a single concrete implementation.
-    settings:
-      unused:
-      # List of packages path to exclude from the check.
-      # Default: []
-      # exclude:
-      #  - github.com/example/log
-  loggercheck:
-    kitlog: false
-    klog: false
-    logr: false
-    slog: false
-    zap: true
-    # Require all logging keys to be inlined constant strings.
-    # Default: false
-    require-string-key: true
-    # Require printf-like format specifier (%s, %d for example) not present.
-    # Default: false
-    no-printf-like: true
-    # List of custom rules to check against, where each rule is a single logger pattern, useful for wrapped loggers.
-    # For example: https://github.com/timonwong/loggercheck/blob/7395ab86595781e33f7afba27ad7b55e6956ebcd/testdata/custom-rules.txt
-    # Default: empty
-    # rules:
-  nilnil:
-    # In addition, detect opposite situation (simultaneous return of non-nil error and valid value).
-    # Default: false
-    detect-opposite: true
-    # List of return types to check.
-    # Default: ["chan", "func", "iface", "map", "ptr", "uintptr", "unsafeptr"]
-    # checked-types:
-    #  - chan
-
+version: "2"
+run:
+  allow-parallel-runners: true
+output:
+  sort-order:
+    - linter
+    - severity
+    - file
 linters:
-  disable-all: true
+  default: none
   enable:
-    - usetesting
-    - nilnesserr
-    - exptostd
-    - loggercheck
-    - recvcheck
-    - iface
-    - protogetter
-    - errname
     - asasalint
     - bodyclose
-    - durationcheck
-    - godot
-    - gofumpt
-    - gomoddirectives
-    - nilerr
-    - nilnil
-    - noctx
-    - predeclared
-    - promlinter
-    - reassign
-    - tagliatelle
-    - testableexamples
-    - thelper
-    - forbidigo
-    - bodyclose
+    - copyloopvar
     - depguard
     - dogsled
     - dupl
+    - durationcheck
     - errcheck
-    - gochecksumtype
+    - errname
     - errorlint
-    - gci
-    - copyloopvar
+    - exptostd
+    - forbidigo
     - funlen
     - gocheckcompilerdirectives
     - gochecknoinits
+    - gochecksumtype
     - goconst
     - gocritic
+    - godot
     - godox
-    - gofmt
-    - mnd
+    - gomoddirectives
     - goprintffuncname
     - gosec
-    - gosimple
     - govet
+    - iface
     - ineffassign
+    - loggercheck
     - misspell
+    - mnd
     - nakedret
+    - nilerr
+    - nilnesserr
+    - nilnil
     - noctx
     - nolintlint
+    - perfsprint
+    - predeclared
+    - promlinter
+    - protogetter
+    - reassign
+    - recvcheck
     - revive
     - staticcheck
-    - stylecheck
+    - tagliatelle
+    - testableexamples
     - testifylint
+    - thelper
     - unconvert
     - unparam
     - unused
     - usestdlibvars
-    - whitespace
+    - usetesting
     - wastedassign
-    - perfsprint
-
+    - whitespace
+  settings:
+    depguard:
+      rules:
+        main:
+          deny:
+            - pkg: github.com/golang/protobuf
+              desc: packet deprecated.
+        test:
+          files:
+            - $test
+          deny:
+            - pkg: reflect
+              desc: Please don't use reflect package in tests
+    dogsled:
+      max-blank-identifiers: 2
+    dupl:
+      threshold: 150
+    errcheck:
+      check-type-assertions: true
+      check-blank: true
+      exclude-functions:
+        - io/ioutil.ReadFile
+        - io.Copy(*bytes.Buffer)
+        - io.Copy(os.Stdout)
+    errorlint:
+      errorf: false
+      asserts: false
+    funlen:
+      lines: 60
+      statements: 40
+      ignore-comments: true
+    goconst:
+      min-len: 2
+      min-occurrences: 3
+      numbers: true
+    gocritic:
+      disabled-checks:
+        - dupImport
+        - ifElseChain
+        - octalLiteral
+      enabled-tags:
+        - diagnostic
+        - experimental
+        - opinionated
+        - performance
+        - style
+      settings:
+        commentedOutCode:
+          minLength: 50
+        elseif:
+          skipBalanced: false
+        hugeParam:
+          sizeThreshold: 512
+        nestingReduce:
+          bodyWidth: 5
+        rangeValCopy:
+          sizeThreshold: 512
+    godot:
+      scope: toplevel
+      exclude:
+        - '^fixme:'
+        - '^todo:'
+        - '^TODO:'
+      capital: true
+      period: true
+    godox:
+      keywords:
+        - FIXME
+    gosec:
+      excludes:
+        - G108
+        - G112
+    govet:
+      disable:
+        - structtag
+        - fieldalignment
+      enable-all: true
+    iface:
+      enable:
+        - identical
+        - unused
+        - opaque
+    loggercheck:
+      kitlog: false
+      klog: false
+      logr: false
+      slog: false
+      zap: true
+      require-string-key: true
+      no-printf-like: true
+    misspell:
+      locale: US
+      ignore-rules:
+        - importas
+    mnd:
+      checks:
+        - argument
+        - case
+        - condition
+        - operation
+        - return
+        - assign
+      ignored-numbers:
+        - "0666"
+      ignored-functions:
+        - strings.SplitN
+    nakedret:
+      max-func-lines: 30
+    nilnil:
+      detect-opposite: true
+    nlreturn:
+      block-size: 2
+    nolintlint:
+      require-explanation: true
+      require-specific: true
+      allow-unused: false
+    protogetter:
+      skip-files:
+        - '*.pb.go'
+      skip-any-generated: true
+      replace-first-arg-in-append: true
+    revive:
+      confidence: 0.8
+      enable-all-rules: true
+      rules:
+        - name: unexported-return
+          disabled: true
+        - name: line-length-limit
+          arguments:
+            - 120
+        - name: add-constant
+          arguments:
+            - fmt\\.Println: null
+              ignoreFuncs = "os\\.*: null
+              make": null
+              maxLitCount = "2": null
+          disabled: true
+        - name: max-public-structs
+          disabled: true
+        - name: function-length
+          arguments:
+            - 30
+            - 50
+          disabled: true
+        - name: cognitive-complexity
+          arguments:
+            - 20
+        - name: cyclomatic
+          arguments:
+            - 15
+        - name: flag-parameter
+          disabled: true
+        - name: filename-format
+          arguments:
+            - ^[_a-z][_a-z0-9]*.go$
+    staticcheck:
+      checks:
+        - all
+    tagliatelle:
+      case:
+        rules:
+          avro: snake
+          bson: camel
+          json: snake
+          mapstructure: kebab
+          xml: camel
+          yaml: snake
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - linters:
+          - dupl
+          - errcheck
+          - funlen
+          - gocyclo
+          - gosec
+          - revive
+        path: (.+)_test\.go
+      - linters:
+          - funlen
+        path: app.go
+      - linters:
+          - govet
+        text: 'shadow: declaration of "(err|ctx)" shadows declaration at'
+      - linters:
+          - goconst
+        path: (.+)_test\.go
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
 issues:
-  # Excluding configuration per-path, per-linter, per-text and per-source
-  exclude-rules:
-    # Exclude some linters from running on tests files.
-    - path: (.+)_test\.go
-      linters:
-        - gocyclo
-        - errcheck
-        - dupl
-        - gosec
-        - revive
-        - funlen
-    - path: app.go
-      linters:
-        - funlen
-    - text: 'shadow: declaration of "(err|ctx)" shadows declaration at'
-      linters: [ govet ]
   # Maximum issues count per one linter.
   # Set to 0 to disable.
   # Default: 50
@@ -330,53 +270,40 @@ issues:
   # Set to 0 to disable.
   # Default: 3
   max-same-issues: 0
+  # Make issues output unique by line.
+  uniq-by-line: true
+  # Show only new issues created after git revision `REV`.
+  new-from-rev: main
+  # Show issues in any part of update files (requires new-from-rev or new-from-patch).
+  whole-files: false
   # Show only new issues: if there are unstaged changes or untracked files,
   # only those changes are analyzed, else only changes in HEAD~ are analyzed.
   # It's a super-useful option for integration of golangci-lint into existing large codebase.
   # It's not practical to fix all existing issues at the moment of integration:
   # much better don't allow issues in new code.
   new: false
-  # Show only new issues created after git revision `REV`.
-  # Default: ""
-  new-from-rev: main # Основная локальная ветка, от которой было сделано ответвление
-  # Show issues in any part of update files (requires new-from-rev or new-from-patch).
-  # Default: false
-  whole-files: false
-  # Make issues output unique by line.
-  # Default: true
-  uniq-by-line: true
-
-# Options for analysis running.
-run:
-  # Timeout for analysis, e.g. 30s, 5m.
-  timeout: 5m
-  # Allow multiple parallel golangci-lint instances running.
-  # If false, golangci-lint acquires file lock on start.
-  allow-parallel-runners: true
-
-# output configuration options
-output:
-  # Print lines of code with issue.
-  print-issued-lines: false
-  # Sort results by the order defined in `sort-order`.
-  sort-results: true
-  # Order to use when sorting results.
-  # Require `sort-results` to `true`.
-  # Possible values: `file`, `linter`, and `severity`.
-  #
-  # If the severity values are inside the following list, they are ordered in this order:
-  #   1. error
-  #   2. warning
-  #   3. high
-  #   4. medium
-  #   5. low
-  # Either they are sorted alphabetically.
-  #
-  # Default: ["file"]
-  sort-order:
-    - linter
-    - severity
-    - file # filepath, line, and column.
-  # Show statistics per linter.
-  # Default: false
-  show-stats: true
+formatters:
+  enable:
+    - gci
+    - gofmt
+    - gofumpt
+  settings:
+    gci:
+      sections:
+        - standard
+        - localmodule
+        - prefix(github.com/Haba1234/)
+        - default
+      custom-order: true
+    gofmt:
+      rewrite-rules:
+        - pattern: interface{}
+          replacement: any
+        - pattern: a[b:len(a)]
+          replacement: a[b:]
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

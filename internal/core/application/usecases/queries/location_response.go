@@ -1,6 +1,6 @@
 package queries
 
-type LocationResponse struct {
+type ModelLocation struct {
 	X int
 	Y int
 }
