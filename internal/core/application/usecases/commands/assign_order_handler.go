@@ -86,14 +86,6 @@ func (ch *AssignOrderHandler) Handle(ctx context.Context, command AssignOrder) e
 		return err
 	}
 
-	if err = orderAggregate.Assign(assignedCourier); err != nil {
-		return err
-	}
-
-	if err = assignedCourier.SetBusy(); err != nil {
-		return err
-	}
-
 	// Сохраняем изменения
 	ctx = ch.unitOfWork.Begin(ctx)
 

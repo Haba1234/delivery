@@ -33,7 +33,7 @@ func TestDispatchService_Dispatch(t *testing.T) {
 			result, err := ds.Dispatch(nil, couriers)
 			assert.Nil(t, result)
 			assert.IsType(t, errs.NewValueIsRequiredError(""), err)
-			assert.Equal(t, "value is required order", err.Error())
+			assert.Equal(t, "value is required: order", err.Error())
 		},
 	)
 
@@ -42,7 +42,7 @@ func TestDispatchService_Dispatch(t *testing.T) {
 			result, err := ds.Dispatch(testOrder, []*courier.Courier{})
 			assert.Nil(t, result)
 			assert.IsType(t, errs.NewValueIsRequiredError(""), err)
-			assert.Equal(t, "value is required couriers", err.Error())
+			assert.Equal(t, "value is required: couriers", err.Error())
 		},
 	)
 
