@@ -28,10 +28,10 @@ func (q *GetNotCompletedOrdersHandler) Handle(query GetNotCompletedOrders) (GetN
 	}
 
 	var orders []OrderResponse
-	result := q.db.Raw(
-		"SELECT id, courier_id, location_x, location_y, status FROM public.orders where status!=?",
-		order.StatusCompleted,
-	).Scan(&orders)
+
+	result := q.db.
+		Raw("SELECT id, location_x, location_y FROM orders WHERE status != ?", order.StatusCompleted).
+		Scan(&orders)
 
 	if result.Error != nil {
 		return GetNotCompletedOrdersResponse{}, result.Error

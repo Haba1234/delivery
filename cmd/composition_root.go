@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/Haba1234/delivery/internal/adapters/in/jobs"
 	"github.com/Haba1234/delivery/internal/adapters/out/postgres"
 	"github.com/Haba1234/delivery/internal/adapters/out/postgres/courier"
 	"github.com/Haba1234/delivery/internal/adapters/out/postgres/order"
@@ -12,6 +13,7 @@ import (
 	"github.com/Haba1234/delivery/internal/core/domain/services"
 	"github.com/Haba1234/delivery/internal/core/ports"
 	"github.com/Haba1234/delivery/internal/pkg/uow"
+	"github.com/robfig/cron/v3"
 
 	"gorm.io/gorm"
 )
@@ -37,11 +39,17 @@ type QueryHandlers struct {
 	GetNotCompletedOrdersHandler queries.IGetNotCompletedOrdersHandler
 }
 
+type Jobs struct {
+	AssignOrders cron.Job
+	MoveCouriers cron.Job
+}
+
 type CompositionRoot struct {
 	DomainServices  DomainServices
 	Repositories    Repositories
 	CommandHandlers CommandHandlers
 	QueryHandlers   QueryHandlers
+	Jobs            Jobs
 }
 
 func NewCompositionRoot(_ context.Context, db *gorm.DB) CompositionRoot {
@@ -95,6 +103,17 @@ func NewCompositionRoot(_ context.Context, db *gorm.DB) CompositionRoot {
 		log.Fatalf("run application error: %s", err)
 	}
 
+	// Jobs
+	assignOrdersJob, err := jobs.NewAssignOrders(assignOrdersHandler)
+	if err != nil {
+		log.Fatalf("run application error: %s", err)
+	}
+
+	moveCouriersJob, err := jobs.NewMoveCouriers(moveCouriersHandler)
+	if err != nil {
+		log.Fatalf("run application error: %s", err)
+	}
+
 	compositionRoot := CompositionRoot{
 		DomainServices: DomainServices{
 			OrderDispatcher: orderDispatcher,
@@ -111,6 +130,10 @@ func NewCompositionRoot(_ context.Context, db *gorm.DB) CompositionRoot {
 		QueryHandlers: QueryHandlers{
 			GetAllCouriersHandler:        getAllCouriersHandler,
 			GetNotCompletedOrdersHandler: getNotCompletedOrdersHandler,
+		},
+		Jobs: Jobs{
+			assignOrdersJob,
+			moveCouriersJob,
 		},
 	}
 

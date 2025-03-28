@@ -4,9 +4,11 @@ import (
 	"github.com/Haba1234/delivery/internal/core/domain/model/order"
 
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type ModelOrder struct {
+	gorm.Model
 	ID        uuid.UUID     `gorm:"type:uuid;primaryKey"`
 	CourierID *uuid.UUID    `gorm:"type:uuid;index"`
 	Location  ModelLocation `gorm:"embedded;embeddedPrefix:location_"`

@@ -89,13 +89,11 @@ func (ch *AssignOrderHandler) Handle(ctx context.Context, command AssignOrder) e
 	// Сохраняем изменения
 	ctx = ch.unitOfWork.Begin(ctx)
 
-	err = ch.orderRepository.Update(ctx, orderAggregate)
-	if err != nil {
+	if err = ch.orderRepository.Update(ctx, orderAggregate); err != nil {
 		ch.unitOfWork.Rollback(ctx)
 		return err
 	}
-	err = ch.courierRepository.Update(ctx, assignedCourier)
-	if err != nil {
+	if err = ch.courierRepository.Update(ctx, assignedCourier); err != nil {
 		ch.unitOfWork.Rollback(ctx)
 		return err
 	}

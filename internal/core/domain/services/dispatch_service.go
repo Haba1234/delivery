@@ -1,6 +1,9 @@
 package services
 
 import (
+	"errors"
+	"math"
+
 	"github.com/Haba1234/delivery/internal/core/domain/model/courier"
 	"github.com/Haba1234/delivery/internal/core/domain/model/order"
 	"github.com/Haba1234/delivery/internal/pkg/errs"
@@ -24,9 +27,13 @@ func (*DispatchService) Dispatch(o *order.Order, couriers []*courier.Courier) (*
 	orderLocation := o.Location()
 
 	var nearestCourier *courier.Courier
-	var minDeliveryTime float64
+	minDeliveryTime := float64(math.MaxInt64)
 
 	for i, c := range couriers {
+		if c == nil || c.Status() == courier.StatusBusy {
+			continue // Пропускаем nil курьеров или уже занятых курьеров
+		}
+
 		deliveryTime, err := c.CalculateTimeToLocation(orderLocation)
 		if err != nil {
 			return nil, err
@@ -36,6 +43,20 @@ func (*DispatchService) Dispatch(o *order.Order, couriers []*courier.Courier) (*
 			nearestCourier = c
 			minDeliveryTime = deliveryTime
 		}
+	}
+
+	if nearestCourier == nil {
+		return nil, errors.New("no available couriers found")
+	}
+
+	err := o.Assign(nearestCourier)
+	if err != nil {
+		return nil, err
+	}
+
+	err = nearestCourier.SetBusy()
+	if err != nil {
+		return nil, err
 	}
 
 	return nearestCourier, nil

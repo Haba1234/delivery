@@ -35,7 +35,7 @@ func TestAssignOrderHandler_Handle(t *testing.T) {
 			cmd := AssignOrder{}
 			err := handler.Handle(t.Context(), cmd)
 			require.Error(t, err)
-			assert.EqualError(t, err, "value is required add address command")
+			assert.EqualError(t, err, "value is required: add address command")
 		},
 	)
 

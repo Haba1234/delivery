@@ -1,5 +1,5 @@
 # yaml-language-servers: ...
-package: api
+package: servers
 output: pkg/servers/servers.gen.go
 generate:
   echo-server: true
