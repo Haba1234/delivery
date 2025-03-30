@@ -32,7 +32,7 @@ func TestMoveCouriersHandler_Handle(t *testing.T) {
 			cmd := MoveCouriers{}
 			err := handler.Handle(t.Context(), cmd)
 			require.Error(t, err)
-			assert.EqualError(t, err, "value is required add address command")
+			assert.EqualError(t, err, "value is required: add address command")
 		},
 	)
 

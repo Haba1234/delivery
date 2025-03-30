@@ -27,7 +27,7 @@ func TestHandleWithMocks(t *testing.T) {
 			cmd := CreateOrder{}
 			err := commandHandler.Handle(t.Context(), cmd)
 			require.Error(t, err)
-			assert.EqualError(t, err, "value is required add address command")
+			assert.EqualError(t, err, "value is required: add address command")
 		},
 	)
 

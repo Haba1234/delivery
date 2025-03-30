@@ -27,7 +27,10 @@ func (q *GetAllCouriersHandler) Handle(query GetAllCouriers) (GetAllCouriersResp
 	}
 
 	var couriers []CourierResponse
-	result := q.db.Raw("SELECT id,name, location_x, location_y FROM couriers").Scan(&couriers)
+
+	result := q.db.
+		Raw("SELECT id, name, location_x, location_y FROM couriers").
+		Scan(&couriers)
 
 	if result.Error != nil {
 		return GetAllCouriersResponse{}, result.Error
