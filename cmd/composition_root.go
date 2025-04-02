@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/Haba1234/delivery/internal/adapters/in/jobs"
+	kafkain "github.com/Haba1234/delivery/internal/adapters/in/kafka"
 	"github.com/Haba1234/delivery/internal/adapters/out/grpc/geo"
 	"github.com/Haba1234/delivery/internal/adapters/out/postgres"
 	"github.com/Haba1234/delivery/internal/adapters/out/postgres/courier"
@@ -14,8 +15,8 @@ import (
 	"github.com/Haba1234/delivery/internal/core/domain/services"
 	"github.com/Haba1234/delivery/internal/core/ports"
 	"github.com/Haba1234/delivery/internal/pkg/uow"
-	"github.com/robfig/cron/v3"
 
+	"github.com/robfig/cron/v3"
 	"gorm.io/gorm"
 )
 
@@ -49,6 +50,10 @@ type Clients struct {
 	GeoClient ports.IGeoClient
 }
 
+type Consumers struct {
+	OrdersCreateConsumer kafkain.IOrdersCreateConsumer
+}
+
 type CompositionRoot struct {
 	DomainServices  DomainServices
 	Repositories    Repositories
@@ -56,9 +61,12 @@ type CompositionRoot struct {
 	QueryHandlers   QueryHandlers
 	Jobs            Jobs
 	Clients         Clients
+	Consumers       Consumers
+
+	closeFns []func() error
 }
 
-func NewCompositionRoot(_ context.Context, db *gorm.DB, geoClientURL string) CompositionRoot {
+func NewCompositionRoot(_ context.Context, db *gorm.DB, configs Configs) CompositionRoot {
 	// Domain Services
 	orderDispatcher := services.NewDispatchService()
 
@@ -79,7 +87,7 @@ func NewCompositionRoot(_ context.Context, db *gorm.DB, geoClientURL string) Com
 	}
 
 	// Grpc Clients
-	geoClient, err := geo.NewClient(geoClientURL)
+	geoClient, err := geo.NewClient(configs.GeoClientURL)
 	if err != nil {
 		log.Fatalf("run application error: %s", err)
 	}
@@ -111,6 +119,15 @@ func NewCompositionRoot(_ context.Context, db *gorm.DB, geoClientURL string) Com
 	}
 
 	getNotCompletedOrdersHandler, err := queries.NewGetNotCompletedOrdersHandler(db)
+	if err != nil {
+		log.Fatalf("run application error: %s", err)
+	}
+
+	// Kafka Consumers
+	ordersCreateConsumer, err := kafkain.NewOrdersCreateConsumer(
+		configs.KafkaHost, configs.ConsumerGroup,
+		configs.KafkaOrdersCreateTopic, createOrderHandler,
+	)
 	if err != nil {
 		log.Fatalf("run application error: %s", err)
 	}
@@ -147,7 +164,22 @@ func NewCompositionRoot(_ context.Context, db *gorm.DB, geoClientURL string) Com
 			assignOrdersJob,
 			moveCouriersJob,
 		},
+		Consumers: Consumers{
+			OrdersCreateConsumer: ordersCreateConsumer,
+		},
 	}
 
+	// Close
+	compositionRoot.closeFns = append(compositionRoot.closeFns, geoClient.Close)
+	compositionRoot.closeFns = append(compositionRoot.closeFns, ordersCreateConsumer.Close)
+
 	return compositionRoot
+}
+
+func (cr *CompositionRoot) Close() {
+	for _, fn := range cr.closeFns {
+		if err := fn(); err != nil {
+			log.Printf("ошибка при закрытии зависимости: %v", err)
+		}
+	}
 }

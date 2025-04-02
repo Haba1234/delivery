@@ -34,7 +34,13 @@ func main() {
 	dbPassword := goDotEnvVariable("DB_PASSWORD")
 	dbName := goDotEnvVariable("DB_DBNAME")
 	dbSslMode := goDotEnvVariable("DB_SSLMODE")
-	geoClientURL := goDotEnvVariable("GEO_SERVICE_GRPC_URL")
+
+	configs := cmd.Configs{
+		GeoClientURL:           goDotEnvVariable("GEO_SERVICE_GRPC_URL"),
+		KafkaHost:              goDotEnvVariable("KAFKA_HOST"),
+		ConsumerGroup:          goDotEnvVariable("KAFKA_CONSUMER_GROUP"),
+		KafkaOrdersCreateTopic: goDotEnvVariable("KAFKA_BASKET_CONFIRMED_TOPIC"),
+	}
 
 	connectionString, err := makeConnectionString(dbHost, dbPort, dbUser, dbPassword, dbName, dbSslMode)
 	if err != nil {
@@ -45,12 +51,21 @@ func main() {
 	gormDB := mustGormOpen(connectionString)
 	mustAutoMigrate(gormDB)
 
-	compositionRoot := cmd.NewCompositionRoot(ctx, gormDB, geoClientURL)
+	compositionRoot := cmd.NewCompositionRoot(ctx, gormDB, configs)
 
 	cronJob := startCron(compositionRoot)
 	defer stopCron(cronJob)
 
+	startKafkaConsumer(ctx, compositionRoot)
 	startWebServer(compositionRoot, httpPort)
+}
+
+func startKafkaConsumer(ctx context.Context, compositionRoot cmd.CompositionRoot) {
+	go func() {
+		if err := compositionRoot.Consumers.OrdersCreateConsumer.Consume(ctx); err != nil {
+			log.Fatalf("Kafka consumer error: %v", err)
+		}
+	}()
 }
 
 func startCron(compositionRoot cmd.CompositionRoot) *cron.Cron {
