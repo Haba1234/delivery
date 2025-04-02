@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/Haba1234/delivery/internal/adapters/in/jobs"
+	"github.com/Haba1234/delivery/internal/adapters/out/grpc/geo"
 	"github.com/Haba1234/delivery/internal/adapters/out/postgres"
 	"github.com/Haba1234/delivery/internal/adapters/out/postgres/courier"
 	"github.com/Haba1234/delivery/internal/adapters/out/postgres/order"
@@ -44,15 +45,20 @@ type Jobs struct {
 	MoveCouriers cron.Job
 }
 
+type Clients struct {
+	GeoClient ports.IGeoClient
+}
+
 type CompositionRoot struct {
 	DomainServices  DomainServices
 	Repositories    Repositories
 	CommandHandlers CommandHandlers
 	QueryHandlers   QueryHandlers
 	Jobs            Jobs
+	Clients         Clients
 }
 
-func NewCompositionRoot(_ context.Context, db *gorm.DB) CompositionRoot {
+func NewCompositionRoot(_ context.Context, db *gorm.DB, geoClientURL string) CompositionRoot {
 	// Domain Services
 	orderDispatcher := services.NewDispatchService()
 
@@ -72,8 +78,14 @@ func NewCompositionRoot(_ context.Context, db *gorm.DB) CompositionRoot {
 		log.Fatalf("run application error: %s", err)
 	}
 
+	// Grpc Clients
+	geoClient, err := geo.NewClient(geoClientURL)
+	if err != nil {
+		log.Fatalf("run application error: %s", err)
+	}
+
 	// Command Handlers
-	createOrderHandler, err := commands.NewCreateOrderHandler(orderRepository)
+	createOrderHandler, err := commands.NewCreateOrderHandler(orderRepository, geoClient)
 	if err != nil {
 		log.Fatalf("run application error: %s", err)
 	}

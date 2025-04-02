@@ -34,6 +34,7 @@ func main() {
 	dbPassword := goDotEnvVariable("DB_PASSWORD")
 	dbName := goDotEnvVariable("DB_DBNAME")
 	dbSslMode := goDotEnvVariable("DB_SSLMODE")
+	geoClientURL := goDotEnvVariable("GEO_SERVICE_GRPC_URL")
 
 	connectionString, err := makeConnectionString(dbHost, dbPort, dbUser, dbPassword, dbName, dbSslMode)
 	if err != nil {
@@ -44,7 +45,7 @@ func main() {
 	gormDB := mustGormOpen(connectionString)
 	mustAutoMigrate(gormDB)
 
-	compositionRoot := cmd.NewCompositionRoot(ctx, gormDB)
+	compositionRoot := cmd.NewCompositionRoot(ctx, gormDB, geoClientURL)
 
 	cronJob := startCron(compositionRoot)
 	defer stopCron(cronJob)

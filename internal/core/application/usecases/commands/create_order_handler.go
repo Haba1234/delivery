@@ -5,7 +5,6 @@ import (
 	"errors"
 
 	orderrepo "github.com/Haba1234/delivery/internal/adapters/out/postgres/order"
-	"github.com/Haba1234/delivery/internal/core/domain/model/kernel"
 	"github.com/Haba1234/delivery/internal/core/domain/model/order"
 	"github.com/Haba1234/delivery/internal/core/ports"
 	"github.com/Haba1234/delivery/internal/pkg/errs"
@@ -21,15 +20,23 @@ var _ ICreateOrderHandler = &CreateOrderHandler{}
 
 type CreateOrderHandler struct {
 	orderRepository ports.IOrderRepository
+	geoClient       ports.IGeoClient
 }
 
-func NewCreateOrderHandler(orderRepository ports.IOrderRepository) (*CreateOrderHandler, error) {
+func NewCreateOrderHandler(
+	orderRepository ports.IOrderRepository, geoClient ports.IGeoClient,
+) (*CreateOrderHandler, error) {
 	if orderRepository == nil {
 		return nil, errs.NewValueIsRequiredError("orderRepository")
 	}
 
+	if geoClient == nil {
+		return nil, errs.NewValueIsRequiredError("geoClient")
+	}
+
 	return &CreateOrderHandler{
 		orderRepository: orderRepository,
+		geoClient:       geoClient,
 	}, nil
 }
 
@@ -49,7 +56,12 @@ func (ch *CreateOrderHandler) Handle(ctx context.Context, command CreateOrder) e
 	}
 
 	// Получили геопозицию
-	location, err := kernel.CreateRandomLocation()
+	// location, err := kernel.CreateRandomLocation()
+	// if err != nil {
+	// 	return err
+	// }
+
+	location, err := ch.geoClient.GetGeolocation(ctx, command.Street())
 	if err != nil {
 		return err
 	}

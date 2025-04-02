@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	orderrepo "github.com/Haba1234/delivery/internal/adapters/out/postgres/order"
+	"github.com/Haba1234/delivery/internal/core/domain/model/kernel"
 	"github.com/Haba1234/delivery/internal/core/domain/model/order"
 	"github.com/Haba1234/delivery/internal/mocks"
 
@@ -19,7 +20,9 @@ func TestHandleWithMocks(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockOrderRepo := mocks.NewMockIOrderRepository(ctrl)
-	commandHandler, err := NewCreateOrderHandler(mockOrderRepo)
+	mockGeoClient := mocks.NewMockIGeoClient(ctrl)
+
+	commandHandler, err := NewCreateOrderHandler(mockOrderRepo, mockGeoClient)
 	require.NoError(t, err)
 
 	t.Run(
@@ -51,10 +54,16 @@ func TestHandleWithMocks(t *testing.T) {
 	t.Run(
 		"new order was created", func(t *testing.T) {
 			orderID := uuid.New()
+			location, err := kernel.CreateRandomLocation()
+			require.NoError(t, err)
 
 			mockOrderRepo.EXPECT().
 				Get(gomock.Any(), orderID).
 				Return(nil, orderrepo.ErrOrderNotFound)
+
+			mockGeoClient.EXPECT().
+				GetGeolocation(gomock.Any(), "Новая улица").
+				Return(location, nil)
 
 			mockOrderRepo.EXPECT().
 				Add(gomock.Any(), gomock.Any()).
