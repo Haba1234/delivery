@@ -47,3 +47,9 @@ INSERT INTO public.transports(
     id, name, speed, courier_id)
 VALUES ('c24d3116-a75c-4a4b-9b22-1a7dc95a8c79', 'Машина', 3, '407f68be-5adf-4e72-81bc-b1d8e9574cf8');
 ```
+
+## Контракты
+```shell
+protoc --go_out=./pkg/clients/geo --go-grpc_out=./pkg/clients/geo ./api/proto/geo_service.proto
+protoc --go_out=./pkg/clients/basket --go-grpc_out=./pkg/clients/basket ./api/proto/basket_service.proto
+```
