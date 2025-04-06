@@ -7,9 +7,11 @@ import (
 	"github.com/Haba1234/delivery/internal/adapters/out/postgres"
 	"github.com/Haba1234/delivery/internal/core/domain/model/order"
 	"github.com/Haba1234/delivery/internal/core/ports"
+	"github.com/Haba1234/delivery/internal/pkg/ddd"
 	"github.com/Haba1234/delivery/internal/pkg/errs"
 
 	"github.com/google/uuid"
+	"github.com/mehdihadeli/go-mediatr"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -65,6 +67,11 @@ func (r *Repository) Update(ctx context.Context, aggregate *order.Order) error {
 	err := tx.
 		Session(&gorm.Session{FullSaveAssociations: true}).
 		Save(&modelOrder).Error
+	if err != nil {
+		return err
+	}
+
+	err = r.PublishDomainEvents(ctx, aggregate)
 	if err != nil {
 		return err
 	}
@@ -139,4 +146,20 @@ func (r *Repository) GetAllInAssignedStatus(ctx context.Context) ([]*order.Order
 	}
 
 	return aggregates, nil
+}
+
+func (*Repository) PublishDomainEvents(ctx context.Context, aggregate ddd.IAggregateRoot) error {
+	for _, event := range aggregate.GetDomainEvents() {
+		switch event.(type) {
+		case order.CompletedDomainEvent:
+			err := mediatr.Publish[order.CompletedDomainEvent](ctx, event.(order.CompletedDomainEvent))
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	aggregate.ClearDomainEvents()
+
+	return nil
 }

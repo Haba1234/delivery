@@ -11,10 +11,10 @@ import (
 
 var ErrCourierIsBusy = errors.New("courier is busy")
 
-type ID = uuid.UUID
+type CourierID = uuid.UUID
 
 type Courier struct {
-	id        ID
+	id        CourierID
 	name      string
 	transport *Transport
 	location  kernel.Location
@@ -52,7 +52,7 @@ func New(name, transportName string, transportSpeed int, location kernel.Locatio
 	}, nil
 }
 
-func Restore(id ID, name string, transport *Transport, location kernel.Location, status Status) *Courier {
+func Restore(id CourierID, name string, transport *Transport, location kernel.Location, status Status) *Courier {
 	return &Courier{
 		id:        id,
 		name:      name,
@@ -62,7 +62,7 @@ func Restore(id ID, name string, transport *Transport, location kernel.Location,
 	}
 }
 
-func (c *Courier) ID() ID {
+func (c *Courier) ID() CourierID {
 	return c.id
 }
 

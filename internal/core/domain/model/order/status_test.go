@@ -8,9 +8,9 @@ import (
 
 func Test_StatusShouldReturnCorrectName(t *testing.T) {
 	assert.Equal(t, "", StatusEmpty.String())
-	assert.Equal(t, "created", StatusCreated.String())
-	assert.Equal(t, "assigned", StatusAssigned.String())
-	assert.Equal(t, "completed", StatusCompleted.String())
+	assert.Equal(t, "Created", StatusCreated.String())
+	assert.Equal(t, "Assigned", StatusAssigned.String())
+	assert.Equal(t, "Completed", StatusCompleted.String())
 }
 
 func Test_StatusShouldBeEqualWhenAllPropertiesEquals(t *testing.T) {

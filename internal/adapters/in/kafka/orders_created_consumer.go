@@ -7,7 +7,7 @@ import (
 
 	"github.com/Haba1234/delivery/internal/core/application/usecases/commands"
 	"github.com/Haba1234/delivery/internal/pkg/errs"
-	"github.com/Haba1234/delivery/pkg/clients/basket/queues/basketconfirmedpb"
+	"github.com/Haba1234/delivery/pkg/queues/basketconfirmedpb"
 
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	"github.com/google/uuid"
