@@ -25,7 +25,7 @@ func Test_NewTransport(t *testing.T) {
 	)
 
 	t.Run(
-		"Invalid ID", func(t *testing.T) {
+		"Invalid CourierID", func(t *testing.T) {
 			_, err := NewTransport(uuid.Nil, "Test", 2)
 			assert.Error(t, err)
 		},

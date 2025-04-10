@@ -8,13 +8,13 @@ import (
 )
 
 type CreateOrder struct {
-	orderID order.ID
+	orderID order.OrderID
 	street  string
 
 	isSet bool
 }
 
-func (c CreateOrder) OrderID() order.ID {
+func (c CreateOrder) OrderID() order.OrderID {
 	return c.orderID
 }
 
@@ -22,7 +22,7 @@ func (c CreateOrder) Street() string {
 	return c.street
 }
 
-func NewCreateOrder(orderID order.ID, street string) (CreateOrder, error) {
+func NewCreateOrder(orderID order.OrderID, street string) (CreateOrder, error) {
 	if orderID == uuid.Nil {
 		return CreateOrder{}, errs.NewValueIsInvalidError("orderID")
 	}

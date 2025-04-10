@@ -36,10 +36,11 @@ func main() {
 	dbSslMode := goDotEnvVariable("DB_SSLMODE")
 
 	configs := cmd.Configs{
-		GeoClientURL:           goDotEnvVariable("GEO_SERVICE_GRPC_URL"),
-		KafkaHost:              goDotEnvVariable("KAFKA_HOST"),
-		ConsumerGroup:          goDotEnvVariable("KAFKA_CONSUMER_GROUP"),
-		KafkaOrdersCreateTopic: goDotEnvVariable("KAFKA_BASKET_CONFIRMED_TOPIC"),
+		GeoClientURL:                  goDotEnvVariable("GEO_SERVICE_GRPC_URL"),
+		KafkaHost:                     goDotEnvVariable("KAFKA_HOST"),
+		ConsumerGroup:                 goDotEnvVariable("KAFKA_CONSUMER_GROUP"),
+		KafkaOrdersCreateTopic:        goDotEnvVariable("KAFKA_BASKET_CONFIRMED_TOPIC"),
+		KafkaOrdersStatusChangedTopic: goDotEnvVariable("KAFKA_DELIVERY_ORDER_CHANGED_TOPIC"),
 	}
 
 	connectionString, err := makeConnectionString(dbHost, dbPort, dbUser, dbPassword, dbName, dbSslMode)

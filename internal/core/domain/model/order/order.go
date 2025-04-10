@@ -5,6 +5,7 @@ import (
 
 	"github.com/Haba1234/delivery/internal/core/domain/model/courier"
 	"github.com/Haba1234/delivery/internal/core/domain/model/kernel"
+	"github.com/Haba1234/delivery/internal/pkg/ddd"
 	"github.com/Haba1234/delivery/internal/pkg/errs"
 
 	"github.com/google/uuid"
@@ -17,16 +18,18 @@ var (
 )
 
 type (
-	ID    = uuid.UUID
-	Order struct {
-		id        ID
-		courierID *courier.ID
+	OrderID = uuid.UUID
+	Order   struct {
+		id        OrderID
+		courierID *courier.CourierID
 		location  kernel.Location
 		status    Status
+
+		domainEvents []ddd.IDomainEvent
 	}
 )
 
-func New(orderID ID, location kernel.Location) (*Order, error) {
+func New(orderID OrderID, location kernel.Location) (*Order, error) {
 	if orderID == uuid.Nil {
 		return nil, errs.NewValueIsRequiredError("orderID")
 	}
@@ -42,7 +45,7 @@ func New(orderID ID, location kernel.Location) (*Order, error) {
 	}, nil
 }
 
-func Restore(orderID ID, courierID *courier.ID, location kernel.Location, status Status) *Order {
+func Restore(orderID OrderID, courierID *courier.CourierID, location kernel.Location, status Status) *Order {
 	return &Order{
 		id:        orderID,
 		location:  location,
@@ -51,7 +54,7 @@ func Restore(orderID ID, courierID *courier.ID, location kernel.Location, status
 	}
 }
 
-func (o *Order) ID() ID {
+func (o *Order) ID() OrderID {
 	return o.id
 }
 
@@ -63,7 +66,7 @@ func (o *Order) Status() Status {
 	return o.status
 }
 
-func (o *Order) CourierID() *courier.ID {
+func (o *Order) CourierID() *courier.CourierID {
 	return o.courierID
 }
 
@@ -98,9 +101,24 @@ func (o *Order) Complete() error {
 
 	o.status = StatusCompleted
 
+	// Опубликовать доменное событие
+	o.raiseDomainEvent(NewCompletedDomainEvent(o))
+
 	return nil
 }
 
 func (o *Order) IsCompleted() bool {
 	return o.status == StatusCompleted
+}
+
+func (o *Order) ClearDomainEvents() {
+	o.domainEvents = []ddd.IDomainEvent{}
+}
+
+func (o *Order) GetDomainEvents() []ddd.IDomainEvent {
+	return o.domainEvents
+}
+
+func (o *Order) raiseDomainEvent(event ddd.IDomainEvent) {
+	o.domainEvents = append(o.domainEvents, event)
 }
